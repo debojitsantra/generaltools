@@ -1,4 +1,4 @@
-# 🎵 YouTube Music Player with Synced Lyrics
+# 🎵 YouTube Music Player with Synced Lyrics: YTM
 
 A beautiful terminal-based music player for YouTube Music with real-time synced lyrics and mesmerizing ASCII visualizations.
 
@@ -74,7 +74,7 @@ pip install ytmusicapi rich requests
 ### Step 3: Download the Player
 
 ```bash
-# Download yt.py to your desired location
+wget https://raw.githubusercontent.com/debojitsantra/generaltools/refs/heads/main/ytm.py
 chmod +x yt.py
 ```
 
@@ -343,7 +343,6 @@ MIT License - See LICENSE file for details
 
 ## 🙏 Acknowledgments
 
-- Created by deb
 - Inspired by terminal music players like cmus, ncmpcpp
 - Visualization algorithms inspired by classic audio visualizers
 
