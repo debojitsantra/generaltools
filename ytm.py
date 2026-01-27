@@ -1,7 +1,7 @@
 #*requirements*
 '''
-pkg update
-pkg install mpv python
+sudo apt update
+sudo apt install mpv python
 pip install -U ytmusicapi rich requests
 '''
 
