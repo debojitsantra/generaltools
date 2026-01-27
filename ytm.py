@@ -5,7 +5,6 @@ sudo apt install mpv python
 pip install -U ytmusicapi rich requests
 '''
 
-
 import time
 import subprocess
 import os
@@ -128,46 +127,78 @@ class LyricsSync:
         self.lines: List[LrcLine] = []
 
     def fetch_lyrics(self, track_name: str, artist_name: str, album_name: str = "") -> bool:
-        
+        # 1) Primary: lrclib.net (more reliable)
         try:
-            url = "https://api.lyrics.boidu.dev/lyrics"
-            params = {
-                "track_name": track_name,
-                "artist_name": artist_name,
-                "album_name": album_name,
-            }
-            console.print("[cyan]Fetching lyrics [/cyan]")
-            r = requests.get(url, params=params, timeout=10)
-            if r.status_code == 200:
-                data = r.json()
-                synced = data.get("syncedLyrics")
-                if synced:
-                    console.print("[green]✓ Found [/green]")
-                    self.lines = self._parse_lrc(synced)
-                    return len(self.lines) > 0
-        except Exception as e:
-            console.print(f"[yellow]Failed: {e}[/yellow]")
-
-      
-        try:
-            console.print("[cyan]Trying fallback...[/cyan]")
+            console.print("[cyan]Fetching lyrics from lrclib...[/cyan]")
             url = "https://lrclib.net/api/get"
             params = {
                 "track_name": track_name,
                 "artist_name": artist_name,
-                "album_name": album_name,
             }
+            if album_name:
+                params["album_name"] = album_name
+            
             r = requests.get(url, params=params, timeout=10)
             if r.status_code == 200:
                 data = r.json()
                 synced = data.get("syncedLyrics")
                 if synced:
-                    console.print("[green]✓ Found [/green]")
+                    console.print("[green]✓ Found synced lyrics[/green]")
                     self.lines = self._parse_lrc(synced)
                     return len(self.lines) > 0
         except Exception as e:
-            console.print(f"[red]fallback failed: {e}[/red]")
+            console.print(f"[yellow]lrclib failed: {e}[/yellow]")
 
+        # 2) Fallback: LRCGET API
+        try:
+            console.print("[cyan]Trying LRCGET fallback...[/cyan]")
+            # Clean up artist and track names for better matching
+            clean_track = track_name.strip()
+            clean_artist = artist_name.strip()
+            
+            url = f"https://lrcget.com/api/get"
+            params = {
+                "title": clean_track,
+                "artist": clean_artist,
+            }
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            }
+            
+            r = requests.get(url, params=params, headers=headers, timeout=10)
+            if r.status_code == 200:
+                data = r.json()
+                # LRCGET returns lyrics in 'lrc' field
+                synced = data.get("lrc") or data.get("lyrics")
+                if synced:
+                    console.print("[green]✓ Found from fallback[/green]")
+                    self.lines = self._parse_lrc(synced)
+                    return len(self.lines) > 0
+        except Exception as e:
+            console.print(f"[yellow]LRCGET failed: {e}[/yellow]")
+
+        # 3) Second fallback: search endpoint on lrclib
+        try:
+            console.print("[cyan]Trying lrclib search...[/cyan]")
+            url = "https://lrclib.net/api/search"
+            params = {
+                "q": f"{artist_name} {track_name}",
+            }
+            
+            r = requests.get(url, params=params, timeout=10)
+            if r.status_code == 200:
+                results = r.json()
+                if results and len(results) > 0:
+                    # Take the first result
+                    synced = results[0].get("syncedLyrics")
+                    if synced:
+                        console.print("[green]✓ Found via search[/green]")
+                        self.lines = self._parse_lrc(synced)
+                        return len(self.lines) > 0
+        except Exception as e:
+            console.print(f"[yellow]Search failed: {e}[/yellow]")
+
+        console.print("[red]✗ No synced lyrics found[/red]")
         return False
 
     def _parse_lrc(self, synced_lyrics: str) -> List[LrcLine]:
@@ -181,7 +212,7 @@ class LyricsSync:
                 time_str = line[1:line.index("]")]
                 text = line[line.index("]") + 1 :].strip()
 
-                
+                # skip metadata like [ar:], [ti:]
                 if not re.match(r"^\d+:\d+(\.\d+)?$", time_str):
                     continue
                 if not text:
@@ -200,11 +231,10 @@ class LyricsSync:
         if not self.lines:
             return "No lyrics"
 
-        
         if t < self.lines[0].time:
             return "…"
 
-    
+        # Binary search for the current line
         lo, hi = 0, len(self.lines) - 1
         ans = 0
         while lo <= hi:
@@ -216,8 +246,6 @@ class LyricsSync:
                 hi = mid - 1
 
         return self.lines[ans].text
-
-
 
 # Main
 class YouTubeMusicPlayer:
