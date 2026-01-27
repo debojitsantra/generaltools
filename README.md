@@ -1,4 +1,6 @@
 # General Tools Made By Me
 
-- **conv.py**: [conv.py](https://github.com/)
-- **yt.py**: [yt.py](https://github.com/)
+## Documentations
+
+- **conv.py**: [conv.py](https://github.com/debojitsantra/generaltools/blob/main/CONV.md)
+- **ytm.py**: [ytm.py](https://github.com/debojitsantra/generaltools/blob/main/YTM.md)
