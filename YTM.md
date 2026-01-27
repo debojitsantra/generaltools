@@ -360,4 +360,5 @@ Having issues? Try:
 **Enjoy your music! 🎵✨**
 
 Made with ❤️ for music lovers who appreciate the terminal aesthetic.
-This Documentation is created with the help of Claude
+
+- This Documentation is created with the help of Claude
