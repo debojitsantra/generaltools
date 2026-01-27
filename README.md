@@ -2,5 +2,5 @@
 
 ## Documentations
 
-- **conv.py**: [Readme](https://github.com/debojitsantra/generaltools/blob/main/CONV.md)
-- **ytm.py**: [Readme](https://github.com/debojitsantra/generaltools/blob/main/YTM.md)
+- **conv.py**: [CONV.md](https://github.com/debojitsantra/generaltools/blob/main/CONV.md)
+- **ytm.py**: [YTM.md](https://github.com/debojitsantra/generaltools/blob/main/YTM.md)
